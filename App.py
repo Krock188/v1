@@ -119,35 +119,34 @@ b64 = base64.b64encode(pdf_data).decode()
 href = f'<a href="data:application/octet-stream;base64,{b64}" download="Private_Retirement_Blueprint.pdf">Download PDF Report</a>'
 st.markdown(href, unsafe_allow_html=True)
 
-# ─────────────── ROI DASHBOARD ───────────────
+# ───────── Annualized ROI Dashboard ─────────
 import pandas as pd
 
-st.markdown("## 📈 ROI Dashboard")
+st.markdown("## 📊 Annual ROI Overview")
 
-# Create monthly projection
-months = list(range(1, years_funded + retirement_years + 1))
-contributions = [reposition_amount if m <= years_funded else 0 for m in months]
+# Annual projection timeline
+years = list(range(1, years_funded + retirement_years + 1))
+annual_contributions = [reposition_amount if y <= years_funded else 0 for y in years]
 capital = []
 value = 0
-monthly_rate = (growth_rate / 100) / 12
+annual_rate = (1 + growth_rate / 100)
 
-for c in contributions:
-    value = (value + c) * (1 + monthly_rate)
+for c in annual_contributions:
+    value = (value + c) * annual_rate
     capital.append(value)
 
-cumulative_contrib = [sum(contributions[:i+1]) for i in range(len(contributions))]
+cumulative_contrib = [sum(annual_contributions[:i+1]) for i in range(len(years))]
 roi_percent = [
     round((cap - contrib) / contrib * 100, 2) if contrib > 0 else 0
     for cap, contrib in zip(capital, cumulative_contrib)
 ]
 
-df = pd.DataFrame({
-    "Month": months,
+df_annual = pd.DataFrame({
+    "Year": years,
     "Capital Value ($)": capital,
     "Cumulative Contributions ($)": cumulative_contrib,
     "ROI (%)": roi_percent
 })
 
-st.line_chart(df.set_index("Month")[["Capital Value ($)", "Cumulative Contributions ($)"]])
-
-st.caption("This chart shows your projected capital accumulation over time versus cumulative contributions, highlighting the ROI trajectory of your structured insurance strategy.")
+st.line_chart(df_annual.set_index("Year")[["Capital Value ($)", "Cumulative Contributions ($)"]])
+st.caption("Annualized performance view: Tracks capital growth vs. contributions with clear ROI pacing.")
