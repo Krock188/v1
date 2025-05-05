@@ -41,3 +41,32 @@ with st.expander("How These Strategies Work"):
 
 st.markdown("---")
 st.markdown("**Want a personalized case design? Book a session.**")
+
+from fpdf import FPDF
+import base64
+
+# Function to generate PDF
+def generate_pdf(total_contributions, future_value, estimated_annual_income):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    pdf.cell(200, 10, txt="Private Retirement Blueprint", ln=True, align='C')
+    pdf.ln(10)
+    pdf.cell(200, 10, txt=f"Total Contributions: ${total_contributions:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Projected Tax-Free Capital: ${future_value:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Estimated Annual Tax-Free Income: ${estimated_annual_income:,.2f}", ln=True)
+    pdf.ln(10)
+    pdf.multi_cell(0, 10, txt="This projection assumes tax-deferred accumulation and tax-free distributions under IRC §7702 using structured life insurance strategies.")
+
+    return pdf.output(dest='S').encode('latin1')
+
+# Show Report Download Section
+st.markdown("### Your PDF Report")
+st.write("Download your personalized projection to review or share with your tax advisor.")
+
+# Generate and display PDF download link
+pdf_data = generate_pdf(total_contributions, future_value, estimated_annual_income)
+b64 = base64.b64encode(pdf_data).decode()
+href = f'<a href="data:application/octet-stream;base64,{b64}" download="Private_Retirement_Blueprint.pdf">📄 Download PDF Report</a>'
+st.markdown(href, unsafe_allow_html=True)
