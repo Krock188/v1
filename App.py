@@ -12,20 +12,45 @@ if mode:
     st.markdown(
         """
         <style>
-        body {
-            background-color: #0e1117;
-            color: #FAFAFA;
-        }
         .stApp {
-            background-color: #0e1117;
-            color: #FAFAFA;
-        }
-        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-            color: #FAFAFA;
-        }
-        .stSidebar, .stSidebarContent {
             background-color: #111111;
             color: #FAFAFA;
+        }
+
+        .css-18e3th9 {
+            background-color: #111111 !important;
+        }
+
+        .css-1d391kg, .css-1avcm0n {
+            background-color: #0e0e0e !important;
+        }
+
+        .stMarkdown h1, h2, h3, h4, h5, h6 {
+            color: #ffffff;
+        }
+
+        .css-1cpxqw2, .css-ffhzg2 {
+            color: #ffffff !important;
+        }
+
+        .stButton>button {
+            background-color: #333;
+            color: #FAFAFA;
+            border: 1px solid #888;
+            border-radius: 8px;
+        }
+
+        .stSelectbox>div>div {
+            background-color: #222 !important;
+            color: #FAFAFA !important;
+        }
+
+        .stSlider > div {
+            color: #FAFAFA;
+        }
+
+        a {
+            color: #4fa3f7 !important;
         }
         </style>
         """,
