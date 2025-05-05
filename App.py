@@ -118,3 +118,36 @@ pdf_data = generate_pdf(total_contributions, future_value, estimated_annual_inco
 b64 = base64.b64encode(pdf_data).decode()
 href = f'<a href="data:application/octet-stream;base64,{b64}" download="Private_Retirement_Blueprint.pdf">Download PDF Report</a>'
 st.markdown(href, unsafe_allow_html=True)
+
+# ─────────────── ROI DASHBOARD ───────────────
+import pandas as pd
+
+st.markdown("## 📈 ROI Dashboard")
+
+# Create monthly projection
+months = list(range(1, years_funded + retirement_years + 1))
+contributions = [reposition_amount if m <= years_funded else 0 for m in months]
+capital = []
+value = 0
+monthly_rate = (growth_rate / 100) / 12
+
+for c in contributions:
+    value = (value + c) * (1 + monthly_rate)
+    capital.append(value)
+
+cumulative_contrib = [sum(contributions[:i+1]) for i in range(len(contributions))]
+roi_percent = [
+    round((cap - contrib) / contrib * 100, 2) if contrib > 0 else 0
+    for cap, contrib in zip(capital, cumulative_contrib)
+]
+
+df = pd.DataFrame({
+    "Month": months,
+    "Capital Value ($)": capital,
+    "Cumulative Contributions ($)": cumulative_contrib,
+    "ROI (%)": roi_percent
+})
+
+st.line_chart(df.set_index("Month")[["Capital Value ($)", "Cumulative Contributions ($)"]])
+
+st.caption("This chart shows your projected capital accumulation over time versus cumulative contributions, highlighting the ROI trajectory of your structured insurance strategy.")
