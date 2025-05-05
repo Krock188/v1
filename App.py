@@ -1,51 +1,75 @@
 import streamlit as st
+from fpdf import FPDF
+import base64
 
-# Page Setup
+# ─────────────── PAGE SETUP ───────────────
 st.set_page_config(page_title="Private Retirement Blueprint", layout="wide")
-st.title("Private Retirement Blueprint")
-st.subheader("Calculate Your Potential Tax-Free Cash Flow")
 
-# Sidebar Inputs
-st.sidebar.header("Input Assumptions")
-annual_income = st.sidebar.number_input("Annual Income ($)", value=250000, step=10000)
-reposition_amount = st.sidebar.number_input("Amount Repositioned Annually ($)", value=50000, step=5000)
+# ─────────────── DARK MODE TOGGLE ───────────────
+mode = st.toggle("🌙 Dark Mode", value=False)
+
+if mode:
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #0e1117;
+            color: #FAFAFA;
+        }
+        .stApp {
+            background-color: #0e1117;
+            color: #FAFAFA;
+        }
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+            color: #FAFAFA;
+        }
+        .stSidebar, .stSidebarContent {
+            background-color: #111111;
+            color: #FAFAFA;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ─────────────── HEADER ───────────────
+st.markdown("# Private Retirement Blueprint")
+st.markdown("_A modern approach to building tax-free income with structured insurance_")
+st.markdown("---")
+
+# ─────────────── SIDEBAR INPUTS ───────────────
+st.sidebar.markdown("### Customize Your Scenario")
+
+annual_income = st.sidebar.number_input("Annual Income", value=250000, step=10000)
+reposition_amount = st.sidebar.number_input("Repositioned Amount (Annual)", value=50000, step=5000)
 product = st.sidebar.selectbox("Product Type", ["Indexed UL", "Variable UL", "Whole Life", "Guaranteed UL"])
-growth_rate = st.sidebar.slider("Expected Annual Growth Rate (%)", 3.0, 9.0, 6.0)
+growth_rate = st.sidebar.slider("Growth Rate (%)", 3.0, 9.0, 6.0)
 years_funded = st.sidebar.slider("Years of Contributions", 5, 30, 15)
 retirement_years = st.sidebar.slider("Years of Retirement Income", 10, 40, 25)
 
-# Backend Calculations
+# ─────────────── CALCULATIONS ───────────────
 total_contributions = reposition_amount * years_funded
 future_value = total_contributions * ((1 + growth_rate / 100) ** (retirement_years - years_funded))
 estimated_annual_income = future_value / retirement_years
 
-# Output Display
-st.markdown("### Results")
-st.metric("Total Contributions", f"${total_contributions:,.0f}")
-st.metric("Projected Tax-Free Capital", f"${future_value:,.0f}")
-st.metric("Estimated Annual Tax-Free Income", f"${estimated_annual_income:,.0f}")
-
-with st.expander("How These Strategies Work"):
-    st.markdown("""
-    **How this works:**
-    - Your annual contributions are assumed to grow at the selected rate.
-    - The capital compounds tax-deferred.
-    - At retirement, distributions are modeled as tax-free policy loans (under IRC §7702).
-
-    **Product Highlights:**
-    - *IUL*: Growth tied to an index, downside floor
-    - *VUL*: Investment-driven with subaccount options
-    - *Whole Life*: Guarantees + dividends
-    - *GUL*: Low cash value, high death benefit
-    """)
+# ─────────────── OUTPUT METRICS ───────────────
+st.markdown("## Results")
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Contributions", f"${total_contributions:,.0f}")
+col2.metric("Projected Capital", f"${future_value:,.0f}")
+col3.metric("Tax-Free Income", f"${estimated_annual_income:,.0f}")
 
 st.markdown("---")
-st.markdown("**Want a personalized case design? Book a session.**")
 
-from fpdf import FPDF
-import base64
+# ─────────────── STRATEGY EXPLAINER ───────────────
+with st.expander("About This Strategy"):
+    st.markdown("""
+    This tool models capital accumulation using structured insurance products like IUL, VUL, Whole Life, and GUL.
+    
+    It assumes tax-deferred growth and tax-free income via policy loans under **IRC §7702**. Results are illustrative and depend on actual policy design and carrier performance.
+    """)
 
-# Function to generate PDF
+# ─────────────── PDF GENERATION FUNCTION ───────────────
 def generate_pdf(total_contributions, future_value, estimated_annual_income):
     pdf = FPDF()
     pdf.add_page()
@@ -54,19 +78,18 @@ def generate_pdf(total_contributions, future_value, estimated_annual_income):
     pdf.cell(200, 10, txt="Private Retirement Blueprint", ln=True, align='C')
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Total Contributions: ${total_contributions:,.2f}", ln=True)
-    pdf.cell(200, 10, txt=f"Projected Tax-Free Capital: ${future_value:,.2f}", ln=True)
-    pdf.cell(200, 10, txt=f"Estimated Annual Tax-Free Income: ${estimated_annual_income:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Projected Capital: ${future_value:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Estimated Tax-Free Income: ${estimated_annual_income:,.2f}", ln=True)
     pdf.ln(10)
-    pdf.multi_cell(0, 10, txt="This projection assumes tax-deferred accumulation and tax-free distributions under IRC §7702 using structured life insurance strategies.")
+    pdf.multi_cell(0, 10, txt="Projections assume tax-deferred growth and policy loan distributions under IRC §7702. Based on selected growth assumptions and retirement duration.")
 
     return pdf.output(dest='S').encode('latin1')
 
-# Show Report Download Section
-st.markdown("### Your PDF Report")
-st.write("Download your personalized projection to review or share with your tax advisor.")
+# ─────────────── PDF DOWNLOAD LINK ───────────────
+st.markdown("### Download Report")
+st.write("Get a clean summary of your projection for offline review.")
 
-# Generate and display PDF download link
 pdf_data = generate_pdf(total_contributions, future_value, estimated_annual_income)
 b64 = base64.b64encode(pdf_data).decode()
-href = f'<a href="data:application/octet-stream;base64,{b64}" download="Private_Retirement_Blueprint.pdf">📄 Download PDF Report</a>'
+href = f'<a href="data:application/octet-stream;base64,{b64}" download="Private_Retirement_Blueprint.pdf">Download PDF Report</a>'
 st.markdown(href, unsafe_allow_html=True)
